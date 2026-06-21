@@ -66,6 +66,18 @@ login เดียวทั้งลูกค้า/แอดมิน แยก
 - **ฝั่งลูกค้าเสร็จครบ:** รายการสินค้า, รายละเอียด, ตะกร้า (+CartContext+badge), checkout (mock), ประวัติคำสั่งซื้อ (list/detail + จ่าย/ยกเลิก)
 - **ฝั่ง Admin เสร็จครบ:** จัดการสินค้า (CRUD + รูป), คำสั่งซื้อ (filter + เปลี่ยนสถานะ), ผู้ใช้ (ค้นหา + เปลี่ยน role)
 - ทุกหน้าเชื่อม API จริง + ทดสอบ end-to-end ผ่าน proxy แล้ว
+- **พร้อม deploy แล้ว** (`npm run build` + `npm run lint` ผ่าน) — ดูหัวข้อ Deploy ด้านล่าง
+
+## Deploy (พร้อมแล้ว)
+ไฟล์ที่เตรียมไว้ให้ deploy เป็น static SPA:
+- `public/favicon.svg` — favicon โบว์ริบบิ้นชมพู (เดิม `index.html` อ้าง `/vite.svg` ที่ไม่มี → 404)
+- `public/_redirects` — SPA history fallback ของ **Netlify** (กัน deep link/refresh 404)
+- `vercel.json` — SPA rewrite อันเดียวกันของ **Vercel**
+- `.env.example` — เอกสาร `VITE_API_URL`
+- `eslint.config.js` — flat config (eslint v9) ให้ `npm run lint` ทำงาน
+
+**ขั้นตอน:** build = `npm run build` (ออกที่ `dist/`), ตั้ง env `VITE_API_URL` = origin จริงของ backend (เช่น `https://api.example.com/api`) — ตอน build static จะไม่มี Vite proxy `/api` แล้ว
+**สำคัญ:** ถ้า frontend/backend คนละโดเมน → backend ต้องตั้ง cookie `SameSite=None; Secure` + CORS อนุญาต origin นี้ (ฝั่ง backend จัดการแล้ว ดู `../backend/CLAUDE.md`)
 
 ## งานที่ยังไม่ได้ทำ (เสริม/อนาคต)
 - อัปโหลด Cloudinary ทำเสร็จแล้ว (ฟอร์มสินค้ามีปุ่มอัปโหลด) — รอแค่ตั้ง env Cloudinary ฝั่ง backend ให้เปิดใช้จริง

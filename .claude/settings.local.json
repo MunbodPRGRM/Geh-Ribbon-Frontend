@@ -1,7 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Skill(update-config)"
+      "Skill(update-config)",
+      "Read(//d/AllProject/Geh-Ribbon/backend/**)",
+      "Bash(node --input-type=module -e \"import\\('./src/app.js'\\).then\\(\\(\\)=>console.log\\('OK: app.js โหลดผ่าน \\(syntax + env valid\\)'\\)\\).catch\\(e=>{console.error\\('FAIL:',e.message\\);process.exit\\(1\\)}\\)\")"
     ]
   }
 }
