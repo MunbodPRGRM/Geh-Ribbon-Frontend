@@ -1,1 +1,124 @@
 @import "tailwindcss";
+
+/* ── Design tokens (โทนอบอุ่น-หวานละมุน) ───────────────────────── */
+@theme {
+  --font-sans: "Prompt", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Mali", "Prompt", ui-sans-serif, cursive;
+
+  /* พื้นหลังครีมอุ่น + สีแบรนด์ชมพู */
+  --color-cream: #fdf6f2;
+  --color-cream-deep: #f8ebe3;
+  --color-blush: #fce7ef;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--color-cream);
+    color: var(--color-gray-700);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* แต่งแถบเลื่อนให้กลมกลืนโทนอุ่น */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background-color: #f3cdd9;
+    border-radius: 9999px;
+    border: 2px solid var(--color-cream);
+  }
+}
+
+/* ── Reusable components ────────────────────────────────────────── */
+@layer components {
+  /* การ์ดมุมโค้ง shadow นุ่ม */
+  .card {
+    border-radius: 1rem;
+    background-color: #fff;
+    border: 1px solid #fbe4ee;
+    box-shadow: 0 1px 2px rgba(190, 100, 130, 0.04),
+      0 10px 30px -16px rgba(190, 100, 130, 0.25);
+  }
+
+  /* ปุ่มหลัก: ชมพูไล่เฉด rounded-full */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 9999px;
+    padding: 0.625rem 1.5rem;
+    font-weight: 500;
+    line-height: 1.25rem;
+    transition: all 0.18s ease;
+    cursor: pointer;
+  }
+  .btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .btn-primary {
+    color: #fff;
+    background-image: linear-gradient(to right, #ec4899, #f43f5e);
+    box-shadow: 0 6px 16px -6px rgba(244, 63, 94, 0.55);
+  }
+  .btn-primary:hover:not(:disabled) {
+    background-image: linear-gradient(to right, #db2777, #e11d48);
+    box-shadow: 0 8px 20px -6px rgba(244, 63, 94, 0.6);
+    transform: translateY(-1px);
+  }
+  .btn-primary:active:not(:disabled) {
+    transform: translateY(0) scale(0.985);
+  }
+
+  .btn-outline {
+    color: var(--color-pink-600);
+    background-color: #fff;
+    border: 1px solid var(--color-pink-200);
+  }
+  .btn-outline:hover:not(:disabled) {
+    background-color: var(--color-pink-50);
+  }
+
+  .btn-ghost {
+    color: var(--color-gray-500);
+  }
+  .btn-ghost:hover:not(:disabled) {
+    background-color: var(--color-pink-50);
+    color: var(--color-pink-600);
+  }
+
+  /* ช่องกรอกข้อมูล */
+  .input {
+    width: 100%;
+    border-radius: 0.75rem;
+    border: 1px solid #f3d9e3;
+    background-color: #fff;
+    padding: 0.625rem 0.875rem;
+    color: var(--color-gray-700);
+    outline: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+  .input::placeholder {
+    color: var(--color-gray-300);
+  }
+  .input:focus {
+    border-color: var(--color-pink-300);
+    box-shadow: 0 0 0 3px rgba(249, 168, 212, 0.4);
+  }
+
+  .field-label {
+    display: block;
+    margin-bottom: 0.25rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--color-gray-600);
+  }
+}

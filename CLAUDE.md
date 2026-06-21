@@ -3,25 +3,70 @@
 Frontend ของเว็บอีคอมเมิร์ซขายงานฝีมือริบบิ้น เป็น repo แยกต่างหากบน GitHub (ดูภาพรวมทั้งโปรเจกต์ที่ `../CLAUDE.md`)
 
 ## Stack
-- React + Vite
-- Tailwind CSS v4 (ติดตั้งผ่าน `@tailwindcss/vite` plugin แล้ว — ไม่มี `tailwind.config.js` เพราะ v4 ใช้ CSS-based config, ดูที่ `src/index.css` ซึ่งมีแค่ `@import "tailwindcss";`)
-- ยังไม่ติดตั้ง router/state library ใด ๆ (เช่น react-router-dom) — เป็นการตัดสินใจตั้งใจให้ตั้งค่าต่อเองใน Claude Code
+- React 18 + Vite 6
+- Tailwind CSS v4 (ผ่าน `@tailwindcss/vite` plugin — ไม่มี `tailwind.config.js`, config แบบ CSS อยู่ที่ `src/index.css` ที่มีแค่ `@import "tailwindcss";`)
+- react-router-dom (routing)
+- ไม่ได้ใช้ state library ภายนอก — ใช้ React Context (`AuthContext`) พอ
+- ไม่ได้ใช้ axios — มี fetch wrapper เล็ก ๆ เองที่ `src/lib/api.js`
+
+## การรัน
+```bash
+npm install
+npm run dev      # http://localhost:5173
+```
+ต้องรัน **backend คู่กันด้วย** (`../backend` ที่พอร์ต 4000) — Vite proxy ส่งต่อ `/api` ไป backend ให้อัตโนมัติ (ดู `vite.config.js`) ทำให้ cookie httpOnly ทำงานแบบ same-origin ตอน dev
+
+บัญชี seed สำหรับทดสอบ (มาจาก backend seed):
+- admin: `admin@gehribbon.com` / `admin1234`
+- customer: `demo@gehribbon.com` / `demo1234`
+
+## โครงสร้าง
+```
+src/
+  main.jsx               # ครอบ BrowserRouter + AuthProvider
+  App.jsx                # ประกาศ routes ทั้งหมด (layout route + guards)
+  index.css              # @import "tailwindcss"
+  lib/
+    api.js               # fetch wrapper (credentials:include, get/post/put/patch/del)
+    format.js            # formatPrice (฿ THB)
+  context/
+    AuthContext.jsx      # user/loading + login/register/logout + isAdmin (bootstrap จาก /auth/me)
+    CartContext.jsx      # cart state + addItem/setQuantity/removeItem/clear/refresh (sync ทั้งแอป)
+  components/
+    Layout.jsx           # nav (+ cart badge) + footer + <Outlet/>
+    AdminLayout.jsx      # แท็บเมนู admin (สินค้า/คำสั่งซื้อ/ผู้ใช้) + <Outlet/>
+    RequireAuth.jsx      # guard: ต้องล็อกอิน
+    RequireAdmin.jsx     # guard: ต้องเป็น ADMIN
+    ProductCard.jsx      # การ์ดสินค้า
+    OrderStatusBadge.jsx # ป้ายสถานะออเดอร์ (ไทย + สี) — ใช้ซ้ำได้ทั้งลูกค้า/แอดมิน
+  pages/
+    ProductListPage.jsx  # หน้าแรก/รายการสินค้า (search + pagination) — เชื่อม API จริงแล้ว
+    ProductDetailPage.jsx # รายละเอียดสินค้า (แกลเลอรีหลายรูป + เลือกจำนวน + เพิ่มลงตะกร้า) — เชื่อม API จริงแล้ว
+    CartPage.jsx         # ตะกร้า (แก้จำนวน/ลบ/ยอดรวม/ไป checkout) — เชื่อม API จริงแล้ว
+    CheckoutPage.jsx     # checkout (ฟอร์มที่อยู่ + mock payment + จอสำเร็จ) — เชื่อม API จริงแล้ว
+    LoginPage.jsx        # เชื่อม API จริงแล้ว
+    RegisterPage.jsx     # เชื่อม API จริงแล้ว
+    ProfilePage.jsx      # ข้อมูล user + ประวัติคำสั่งซื้อ (list) — เชื่อม API จริงแล้ว
+    OrderDetailPage.jsx  # รายละเอียดออเดอร์ (/orders/:id) + ปุ่มจ่าย/ยกเลิก — เชื่อม API จริงแล้ว
+    Placeholder.jsx      # placeholder (ไม่ค่อยได้ใช้แล้ว)
+    admin/
+      AdminProductsPage.jsx    # ตารางสินค้า + ลบ + ลิงก์เพิ่ม/แก้
+      AdminProductFormPage.jsx # ฟอร์มเพิ่ม/แก้สินค้า + อัปโหลดรูปไป Cloudinary (หรือใส่ URL)
+      AdminOrdersPage.jsx      # ตารางคำสั่งซื้อทั้งระบบ + filter + เปลี่ยนสถานะ
+      AdminUsersPage.jsx       # ตารางผู้ใช้ + ค้นหา + เปลี่ยน role (กันแก้ตัวเอง)
+```
+admin routing เป็น nested route ใต้ `/admin` (element = `RequireAdmin` + `AdminLayout`), index redirect ไป `/admin/products`
+
+## Auth (ที่ทำแล้ว)
+login เดียวทั้งลูกค้า/แอดมิน แยกด้วย `role` จาก response — ไม่มีหน้า login แยกของ admin
+- `AuthContext` เรียก `GET /auth/me` ตอนเปิดเว็บเพื่อ bootstrap สถานะจาก cookie
+- route guard 2 แบบ (เช็ค `loading` ก่อน redirect เสมอ): `RequireAuth` (ตะกร้า/checkout/โปรไฟล์), `RequireAdmin` (`/admin/*`)
 
 ## สถานะปัจจุบัน
-นี่คือ **bare scaffold** ตั้งใจเก็บให้เรียบที่สุด — มีแค่ `App.jsx` เปล่า ๆ ที่ render ข้อความชื่อร้าน ยังไม่มี routing, pages, component หรือ auth context ใด ๆ
+- **ฝั่งลูกค้าเสร็จครบ:** รายการสินค้า, รายละเอียด, ตะกร้า (+CartContext+badge), checkout (mock), ประวัติคำสั่งซื้อ (list/detail + จ่าย/ยกเลิก)
+- **ฝั่ง Admin เสร็จครบ:** จัดการสินค้า (CRUD + รูป), คำสั่งซื้อ (filter + เปลี่ยนสถานะ), ผู้ใช้ (ค้นหา + เปลี่ยน role)
+- ทุกหน้าเชื่อม API จริง + ทดสอบ end-to-end ผ่าน proxy แล้ว
 
-ยังไม่ได้รัน `npm install` — ต้องรันเองก่อนเริ่ม dev (`npm install` แล้ว `npm run dev`)
-
-## โครงสร้างหน้าที่วางแผนไว้ (ยังไม่ได้สร้าง)
-ฝั่งลูกค้า: หน้าแรก/รายการสินค้า, รายละเอียดสินค้า (มีหลายรูปต่อสินค้า), ตะกร้า, login/register, โปรไฟล์ + ประวัติคำสั่งซื้อ, checkout (ปุ่มชำระเงินแบบ mock)
-
-ฝั่ง Admin (เส้นทางแนะนำ `/admin/*`): จัดการสินค้า (CRUD + อัปโหลดรูปหลายรูปไป Cloudinary), จัดการคำสั่งซื้อ (เปลี่ยนสถานะ), จัดการผู้ใช้
-
-## Auth ที่ต้องออกแบบ
-ใช้ login เดียวกันสำหรับลูกค้าและแอดมิน — แยกด้วย `role` ที่ได้จาก JWT/response ตอน login ไม่มีหน้า login แยกสำหรับ admin ต้องทำ route guard 2 แบบ: ต้องล็อกอิน (ตะกร้า/checkout/โปรไฟล์) และต้องเป็น role ADMIN (`/admin/*`)
-
-## งานที่ยังไม่ได้ทำ (ขั้นต่อไป)
-1. `npm install` ในโฟลเดอร์นี้
-2. ติดตั้ง react-router-dom (หรือทางเลือกอื่น) แล้ววาง routing ตามรายการหน้าด้านบน
-3. ทำ auth context/state เชื่อมกับ backend (login/register, เก็บ JWT, เช็ค role)
-4. สร้างหน้าต่าง ๆ ทีละหน้า เชื่อม API จาก backend
+## งานที่ยังไม่ได้ทำ (เสริม/อนาคต)
+- อัปโหลด Cloudinary ทำเสร็จแล้ว (ฟอร์มสินค้ามีปุ่มอัปโหลด) — รอแค่ตั้ง env Cloudinary ฝั่ง backend ให้เปิดใช้จริง
+- รายละเอียด/ขัดเกลา UI, responsive, toast แทน alert/confirm, เทส automated ถาวร
